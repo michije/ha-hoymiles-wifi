@@ -3,6 +3,8 @@
 This custom component integrates Hoymiles DTUs, HMS-XXXXW microinverters and hybrid inverters into Home Assistant, providing live inverter data.
 It uses the [hoymiles-wifi](https://github.com/suaveolent/hoymiles-wifi) Python library to communicate directly with the devices over your local network — no cloud connection required.
 
+This fork includes a DTU-Lite power-limit readback fix: DTU-Lite devices that do not answer `get_config` can still show the active power limit by reading `power_limit` from real-time inverter data.
+
 > [!NOTE]
 > Disclaimer: This library is not affiliated with Hoymiles. It is an independent project developed to provide tools for interacting with Hoymiles DTUs and Hoymiles HMS-XXXXW series micro-inverters featuring integrated WiFi DTU. Any trademarks or product names mentioned are the property of their respective owners.
 
@@ -17,6 +19,7 @@ The custom component was successfully tested with:
 - Hoymiles HMS-1000W-2T
 - Hoymiles HMS-2000DW-4T
 - Hoymiles DTU-WLite
+- Hoymiles DTU-Lite / DTU-Lite-S power limitation readback
 - Hoymiles DTU-Pro (S)
 - Hoymiles HAS-5.0LV-EUG1
 - Hoymiles HYS-4.6LV-EUG1
