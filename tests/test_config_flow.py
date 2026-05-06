@@ -6,7 +6,7 @@ from unittest.mock import patch
 import pytest
 
 from homeassistant import config_entries
-from custom_components.hoymiles_wifi.const import (
+from custom_components.hoymiles_michije.const import (
     DOMAIN,
     CONF_UPDATE_INTERVAL,
     CONF_INVERTERS,
@@ -14,7 +14,7 @@ from custom_components.hoymiles_wifi.const import (
     CONF_DTU_SERIAL_NUMBER,
     DEFAULT_UPDATE_INTERVAL_SECONDS,
 )
-from custom_components.hoymiles_wifi.error import CannotConnect
+from custom_components.hoymiles_michije.error import CannotConnect
 
 from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
@@ -59,7 +59,7 @@ async def test_form_valid_input(hass: HomeAssistant) -> None:
 
     with (
         patch(
-            "custom_components.hoymiles_wifi.async_setup_entry",
+            "custom_components.hoymiles_michije.async_setup_entry",
             return_value=True,
         ) as mock_setup_entry,
         patch(
@@ -97,7 +97,7 @@ async def test_flow_user_init_data_error_and_recover(
     assert result["errors"] == {}
 
     with patch(
-        "custom_components.hoymiles_wifi.util.DTU.async_get_real_data_new",
+        "custom_components.hoymiles_michije.util.DTU.async_get_real_data_new",
         side_effect=raise_error,
     ) as mock_async_get_config_entry_data_for_host:
         result2 = await hass.config_entries.flow.async_configure(
@@ -114,7 +114,7 @@ async def test_flow_user_init_data_error_and_recover(
     # Recover
     with (
         patch(
-            "custom_components.hoymiles_wifi.async_setup_entry",
+            "custom_components.hoymiles_michije.async_setup_entry",
             return_value=True,
         ) as mock_setup_entry,
         patch(

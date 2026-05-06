@@ -2,7 +2,7 @@
 
 from homeassistant.setup import async_setup_component
 
-from custom_components.hoymiles_wifi.const import DOMAIN
+from custom_components.hoymiles_michije.const import DOMAIN
 
 
 async def test_async_setup(hass):

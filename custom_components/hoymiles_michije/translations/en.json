@@ -2,8 +2,8 @@
   "config": {
     "step": {
       "user": {
-        "title": "Hoymiles DTU connection",
-        "description": "If you need help with the configuration have a look here: https://github.com/suaveolent/ha-hoymiles-wifi",
+        "title": "Hoymiles Michije DTU connection",
+        "description": "If you need help with the configuration have a look here: https://github.com/michije/ha-hoymiles-wifi",
         "data": {
           "host": "Host",
           "update_interval": "Update Interval (seconds)",
@@ -11,8 +11,8 @@
         }
       },
       "reconfigure": {
-        "title": "Hoymiles DTU connection",
-        "description": "If you need help with the configuration have a look here: https://github.com/suaveolent/ha-hoymiles-wifi",
+        "title": "Hoymiles Michije DTU connection",
+        "description": "If you need help with the configuration have a look here: https://github.com/michije/ha-hoymiles-wifi",
         "data": {
           "host": "Host",
           "update_interval": "Update Interval (seconds)",

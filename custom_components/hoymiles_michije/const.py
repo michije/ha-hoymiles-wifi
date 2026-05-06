@@ -1,12 +1,11 @@
 """Constants for the Hoymiles integration."""
 
-DOMAIN = "hoymiles_wifi"
-NAME = "Hoymiles"
-DOMAIN = "hoymiles_wifi"
+DOMAIN = "hoymiles_michije"
+NAME = "Hoymiles Michije"
 DOMAIN_DATA = f"{DOMAIN}_data"
 CONFIG_VERSION = 5
 
-ISSUE_URL = "https://github.com/suaveolent/ha-hoymiles-wifi/issues"
+ISSUE_URL = "https://github.com/michije/ha-hoymiles-wifi/issues"
 
 CONF_UPDATE_INTERVAL = "update_interval"
 CONF_DTU_SERIAL_NUMBER = "dtu_serial_number"

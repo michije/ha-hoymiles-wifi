@@ -1,4 +1,4 @@
-# Hoymiles for Home Assistant
+# Hoymiles Michije for Home Assistant
 
 This custom component integrates Hoymiles DTUs, HMS-XXXXW microinverters and hybrid inverters into Home Assistant, providing live inverter data.
 It uses the [hoymiles-wifi](https://github.com/suaveolent/hoymiles-wifi) Python library to communicate directly with the devices over your local network — no cloud connection required.
@@ -43,19 +43,19 @@ The custom component was successfully tested with:
 
 4. Add a new custom repository:
 
-- **URL:** `https://github.com/suaveolent/ha-hoymiles-wifi`
+- **URL:** `https://github.com/michije/ha-hoymiles-wifi`
 
 - **Category:** Integration
 
 5. Click "Add"
 
-6. Click on the `Hoymiles` integration.
+6. Click on the `Hoymiles Michije` integration.
 
 7. Click "DOWNLOAD"
 
 8. Navigate to "Settings" - "Devices & Services"
 
-9. Click "ADD INTEGRATION" and select the `Hoymiles` integration.
+9. Click "ADD INTEGRATION" and select the `Hoymiles Michije` integration.
 
 10. Insert IP address of hoymiles DTUBI-xxxx in field Host and click on SUBMIT
 
@@ -71,7 +71,7 @@ The custom component was successfully tested with:
 
 2. Extract the ZIP file.
 
-3. Copy the entire `custom_components/hoymiles-wifi` directory to your Home Assistant
+3. Copy the entire `custom_components/hoymiles_michije` directory to your Home Assistant
 
 4. Install the python requirements
 

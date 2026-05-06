@@ -3,7 +3,7 @@ set_bms_mode:
   description: Sets the working mode of the Hoymiles hybrid inverter.
   target:
     device:
-      integration: hoymiles_wifi
+      integration: hoymiles_michije
   fields:
     bms_mode:
       required: true
