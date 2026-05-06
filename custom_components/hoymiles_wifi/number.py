@@ -21,6 +21,7 @@ from .const import (
     CONF_THREE_PHASE_INVERTERS,
     DOMAIN,
     HASS_CONFIG_COORDINATOR,
+    HASS_DATA_COORDINATOR,
 )
 from .entity import HoymilesCoordinatorEntity, HoymilesEntityDescription
 
@@ -73,11 +74,13 @@ async def async_setup_entry(
     """Set up the Hoymiles number entities."""
     hass_data = hass.data[DOMAIN][config_entry.entry_id]
     config_coordinator = hass_data.get(HASS_CONFIG_COORDINATOR, None)
+    data_coordinator = hass_data.get(HASS_DATA_COORDINATOR, None)
+    coordinator = data_coordinator or config_coordinator
     single_phase_inverters = config_entry.data.get(CONF_INVERTERS, [])
     three_phase_inverters = config_entry.data.get(CONF_THREE_PHASE_INVERTERS, [])
     dtu_serial_number = config_entry.data[CONF_DTU_SERIAL_NUMBER]
 
-    if single_phase_inverters or three_phase_inverters:
+    if coordinator and (single_phase_inverters or three_phase_inverters):
         sensors = []
         for description in CONFIG_CONTROL_ENTITIES:
             if description.is_dtu_sensor is True:
@@ -86,7 +89,7 @@ async def async_setup_entry(
                 )
                 sensors.append(
                     HoymilesNumberEntity(
-                        config_entry, updated_description, config_coordinator
+                        config_entry, updated_description, coordinator
                     )
                 )
         async_add_entities(sensors)
@@ -150,12 +153,27 @@ class HoymilesNumberEntity(HoymilesCoordinatorEntity, NumberEntity):
     def update_state_value(self):
         """Update the state value of the entity."""
 
-        # For the moment, we can only retrive the power limit
-        self._native_value = getattr(
-            self.coordinator.data,
-            self._attribute_name,
-            None,
-        )
+        self._native_value = None
+
+        if self._set_action == SetAction.POWER_LIMIT:
+            # DTU-Lite does not answer get_config(), but real_data_new reports the
+            # active limit per inverter as tenths of a percent.
+            for data_group_name in ("sgs_data", "tgs_data"):
+                data_group = getattr(self.coordinator.data, data_group_name, [])
+                for inverter_data in data_group:
+                    power_limit = getattr(inverter_data, "power_limit", None)
+                    if power_limit is not None:
+                        self._native_value = power_limit
+                        break
+                if self._native_value is not None:
+                    break
+
+        if self._native_value is None:
+            self._native_value = getattr(
+                self.coordinator.data,
+                self._attribute_name,
+                None,
+            )
 
         self._assumed_state = False
 
