@@ -3,12 +3,15 @@
 This custom component integrates Hoymiles DTUs, HMS-XXXXW microinverters and hybrid inverters into Home Assistant, providing live inverter data.
 It uses the [hoymiles-wifi](https://github.com/suaveolent/hoymiles-wifi) Python library to communicate directly with the devices over your local network — no cloud connection required.
 
-This fork includes a DTU-Lite power-limit readback fix: DTU-Lite devices that do not answer `get_config` can still show the active power limit by reading `power_limit` from real-time inverter data.
+This is a fork of [suaveolent/ha-hoymiles-wifi](https://github.com/suaveolent/ha-hoymiles-wifi). It keeps a separate Home Assistant integration domain (`hoymiles_michije`) so it can be installed next to the upstream integration without name/domain conflicts.
+
+Fork-specific changes:
+
+- DTU-Lite devices that do not answer `get_config` can show the active power limit by reading `power_limit` from real-time inverter data.
+- DTU-Lite/WLite-S startup readback is guarded against transient `0.0%` values after night-time inverter sleep.
 
 > [!NOTE]
 > Disclaimer: This library is not affiliated with Hoymiles. It is an independent project developed to provide tools for interacting with Hoymiles DTUs and Hoymiles HMS-XXXXW series micro-inverters featuring integrated WiFi DTU. Any trademarks or product names mentioned are the property of their respective owners.
-
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/suaveolent)
 
 ## Supported Devices
 
@@ -127,5 +130,9 @@ Use this custom component responsibly and be aware of potential risks. There are
 > **Compatibility:** While developed for the HMS-800W-2T inverter, compatibility with other inverters from the series is untested at the time of writing. Exercise caution and conduct thorough testing if using with different inverter models.
 
 ## Attribution
+
+This fork is based on [suaveolent/ha-hoymiles-wifi](https://github.com/suaveolent/ha-hoymiles-wifi), which provides the original Home Assistant integration.
+
+Device communication is handled by the upstream [suaveolent/hoymiles-wifi](https://github.com/suaveolent/hoymiles-wifi) Python library.
 
 This project was generated from [@oncleben31](https://github.com/oncleben31)'s [Home Assistant Custom Component Cookiecutter](https://github.com/oncleben31/cookiecutter-homeassistant-custom-component) template.
