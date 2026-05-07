@@ -4,6 +4,7 @@ import dataclasses
 from dataclasses import dataclass
 from enum import Enum
 import logging
+import time
 
 from homeassistant.components.number import (
     NumberDeviceClass,
@@ -65,6 +66,7 @@ CONFIG_CONTROL_ENTITIES = (
 )
 
 _LOGGER = logging.getLogger(__name__)
+ZERO_LIMIT_SET_GRACE_SECONDS = 10 * 60
 
 
 async def async_setup_entry(
@@ -112,6 +114,7 @@ class HoymilesNumberEntity(HoymilesCoordinatorEntity, NumberEntity, RestoreEntit
         self._set_action = description.set_action
         self._native_value = None
         self._last_nonzero_native_value = None
+        self._accept_zero_until = 0.0
         self._assumed_state = False
 
         self.update_state_value()
@@ -149,8 +152,9 @@ class HoymilesNumberEntity(HoymilesCoordinatorEntity, NumberEntity, RestoreEntit
         except (TypeError, ValueError):
             return
 
-        if restored_value > 0:
+        if restored_value >= 0:
             self._native_value = restored_value
+        if restored_value > 0:
             self._last_nonzero_native_value = restored_value
 
     async def async_set_native_value(self, value: float) -> None:
@@ -172,6 +176,10 @@ class HoymilesNumberEntity(HoymilesCoordinatorEntity, NumberEntity, RestoreEntit
 
         self._assumed_state = True
         self._native_value = value
+        if value == 0:
+            self._accept_zero_until = time.monotonic() + ZERO_LIMIT_SET_GRACE_SECONDS
+        else:
+            self._accept_zero_until = 0.0
         self._remember_nonzero_value(value)
 
     def update_state_value(self):
@@ -211,6 +219,7 @@ class HoymilesNumberEntity(HoymilesCoordinatorEntity, NumberEntity, RestoreEntit
             self._set_action == SetAction.POWER_LIMIT
             and native_value == 0
             and self._last_nonzero_native_value is not None
+            and time.monotonic() > self._accept_zero_until
         ):
             native_value = self._last_nonzero_native_value
 
