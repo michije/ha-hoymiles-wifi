@@ -14,6 +14,7 @@ from homeassistant.components.number import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import (
     CONF_DTU_SERIAL_NUMBER,
@@ -95,7 +96,7 @@ async def async_setup_entry(
         async_add_entities(sensors)
 
 
-class HoymilesNumberEntity(HoymilesCoordinatorEntity, NumberEntity):
+class HoymilesNumberEntity(HoymilesCoordinatorEntity, NumberEntity, RestoreEntity):
     """Hoymiles Number entity."""
 
     def __init__(
@@ -110,6 +111,7 @@ class HoymilesNumberEntity(HoymilesCoordinatorEntity, NumberEntity):
         self._conversion_factor = description.conversion_factor
         self._set_action = description.set_action
         self._native_value = None
+        self._last_nonzero_native_value = None
         self._assumed_state = False
 
         self.update_state_value()
@@ -130,6 +132,27 @@ class HoymilesNumberEntity(HoymilesCoordinatorEntity, NumberEntity):
         """Return the assumed state of the entity."""
         return self._assumed_state
 
+    async def async_added_to_hass(self) -> None:
+        """Restore the last valid value to survive DTU sleep/startup zeros."""
+        await super().async_added_to_hass()
+
+        if self._native_value is not None:
+            self._remember_nonzero_value(self._native_value)
+            return
+
+        last_state = await self.async_get_last_state()
+        if last_state is None:
+            return
+
+        try:
+            restored_value = float(last_state.state)
+        except (TypeError, ValueError):
+            return
+
+        if restored_value > 0:
+            self._native_value = restored_value
+            self._last_nonzero_native_value = restored_value
+
     async def async_set_native_value(self, value: float) -> None:
         """Set the native value of the entity.
 
@@ -138,7 +161,7 @@ class HoymilesNumberEntity(HoymilesCoordinatorEntity, NumberEntity):
         """
         if self._set_action == SetAction.POWER_LIMIT:
             dtu = self.coordinator.get_dtu()
-            if value < 0 and value > 100:
+            if value < 0 or value > 100:
                 _LOGGER.error("Power limit value out of range")
                 return
             await dtu.async_set_power_limit(value)
@@ -149,11 +172,12 @@ class HoymilesNumberEntity(HoymilesCoordinatorEntity, NumberEntity):
 
         self._assumed_state = True
         self._native_value = value
+        self._remember_nonzero_value(value)
 
     def update_state_value(self):
         """Update the state value of the entity."""
 
-        self._native_value = None
+        native_value = None
 
         if self._set_action == SetAction.POWER_LIMIT:
             # DTU-Lite does not answer get_config(), but real_data_new reports the
@@ -163,13 +187,13 @@ class HoymilesNumberEntity(HoymilesCoordinatorEntity, NumberEntity):
                 for inverter_data in data_group:
                     power_limit = getattr(inverter_data, "power_limit", None)
                     if power_limit is not None:
-                        self._native_value = power_limit
+                        native_value = power_limit
                         break
-                if self._native_value is not None:
+                if native_value is not None:
                     break
 
-        if self._native_value is None:
-            self._native_value = getattr(
+        if native_value is None:
+            native_value = getattr(
                 self.coordinator.data,
                 self._attribute_name,
                 None,
@@ -177,5 +201,23 @@ class HoymilesNumberEntity(HoymilesCoordinatorEntity, NumberEntity):
 
         self._assumed_state = False
 
-        if self._native_value is not None and self._conversion_factor is not None:
-            self._native_value *= self._conversion_factor
+        if native_value is not None and self._conversion_factor is not None:
+            native_value *= self._conversion_factor
+
+        # During night/morning startup DTU-Lite/WLite-S can briefly report a
+        # protobuf power_limit of 0 although the configured limit is unchanged.
+        # Keep the last non-zero value instead of showing a bogus 0.0%.
+        if (
+            self._set_action == SetAction.POWER_LIMIT
+            and native_value == 0
+            and self._last_nonzero_native_value is not None
+        ):
+            native_value = self._last_nonzero_native_value
+
+        self._native_value = native_value
+        self._remember_nonzero_value(native_value)
+
+    def _remember_nonzero_value(self, value: float | None) -> None:
+        """Remember a valid non-zero value for DTU wake-up zero fallback."""
+        if value is not None and value > 0:
+            self._last_nonzero_native_value = value
